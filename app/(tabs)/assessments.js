@@ -1,27 +1,25 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
-import {StyleSheet, View, Text, SafeAreaView, FlatList} from "react-native";
-import {useState, useEffect} from "react";
-import {GestureHandlerRootView} from "react-native-gesture-handler";
+import { StyleSheet, View, Text, SafeAreaView, FlatList } from "react-native";
+import { useState, useEffect } from "react";
+import { formatDate } from "../helpers/utils";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
-import {Collapsible} from "@/components/Collapsible";
-import {ExternalLink} from "@/components/ExternalLink";
+import { Collapsible } from "@/components/Collapsible";
+import { ExternalLink } from "@/components/ExternalLink";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
-import {ThemedText} from "@/components/ThemedText";
-import {ThemedView} from "@/components/ThemedView";
-import {ScrollView} from "react-native-gesture-handler";
+import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
+import { ScrollView } from "react-native-gesture-handler";
+
+import {
+  useFonts,
+  SourceSerifPro_300Light,
+  SourceSerifPro_600SemiBold,
+} from '@expo-google-fonts/source-serif-pro';
 
 // import {API_TOKEN} from '@env'
 
-// interface Item {
-//   title: string;
-//   // Add any other properties here
-// }
-
-export default function TabTwoScreen() {
-  const initialData = {
-    assessments : [],
-    assessmentsDetail: []
-  }
+export default function Assessments() {
   const [assessments, setAssessments] = useState([]);
 
 
@@ -29,33 +27,36 @@ export default function TabTwoScreen() {
     try {
       const responses = await assessmentData.map(res => {
         return fetch(res.api_url, {
-          headers:{
-            'Content-Type' : 'application/x-www-form-urlencoded',
-            'Authorization': 'Token 1d9f37cf23238e688ec018a8ec57a9ee19969332'
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Authorization': 'Token 067a9010faf05335990c711dc405083da4366e89'
+            // 'Authorization': 'Token 1d9f37cf23238e688ec018a8ec57a9ee19969332'
           }
-        } )
-      })
-      console.log('resp', responses)
+        });
+      });
+
       const jsonProms = await Promise.all(responses);
       const promises = jsonProms.map(r => r.json());
-      const data = await Promise.all(promises)
-      console.log('data',data)
-    } catch(error) {
-      console.error(error)
+      const data = await Promise.all(promises);
+      setAssessments(data);
+
+    } catch (error) {
+      console.error(error);
     }
-  }
+  };
 
   const fetchAssessments = async () => {
     try {
       const response = await fetch("http://localhost:8000/api/assessmentsessions/", {
-        headers:{
-          'Content-Type' : 'application/x-www-form-urlencoded',
-          'Authorization': 'Token 1d9f37cf23238e688ec018a8ec57a9ee19969332'
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Authorization': 'Token 067a9010faf05335990c711dc405083da4366e89'
+          // 'Authorization': 'Token 1d9f37cf23238e688ec018a8ec57a9ee19969332'
         }
       });
 
       const data = await response.json();
-      setAssessments(data.results);
+
       fetchAssessmentDetail(data.results);
 
     } catch (error) {
@@ -67,19 +68,20 @@ export default function TabTwoScreen() {
     fetchAssessments();
   }, []);
 
-
-  const renderItem = ({item}) => (
+  const renderItem = ({ item }) => (
     <View style={styles.card}>
       <Text style={styles.title}>{item.title}</Text>
+      <Text>Start: {formatDate(item.start_at)}</Text>
+      <Text>Due: {formatDate(item.end_at)}</Text>
     </View>
   );
 
-  console.log("characters: ", assessments);
+  console.log("assessments: ", assessments);
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text >Assessments</Text>
-        </View>
+        <Text style={styles.headerTitle}>Assessments</Text>
+      </View>
 
       <FlatList
         data={assessments}
@@ -93,21 +95,38 @@ export default function TabTwoScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#eeeeee",
+    fontFamily: 'SourceSerifPro_300Light'
   },
   title: {
-    color: "blue",
-    fontFamily: "serif-pro"
+    color: "#00367d",
+    fontSize: 16,
+    fontFamily: "SourceSerifPro_300Light"
   },
   card: {
     height: 70,
-    backgroundColor: "#e46b65",
-    margin: 5,
+    backgroundColor: "#ffffff",
+    marginTop: 5,
+    marginRight: 10,
+    marginBottom: 5,
+    marginLeft: 10,
     justifyContent: "center",
-    alignContent: 'center'
+    alignContent: 'center',
+    paddingTop: 5,
+    paddingLeft: 10,
+    borderRadius: 10
   },
-  header : {
+  header: {
     flex: 1,
     justifyContent: "center",
-    alignItems: 'center'
+    alignItems: 'center',
+    fontSize: 20,
+    paddingTop: 10,
+    height: 50,
+    paddingBottom: 10
+  },
+  headerTitle: {
+    fontSize: 25,
+    color: "black",
   }
 });
