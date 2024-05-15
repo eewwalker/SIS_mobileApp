@@ -2,6 +2,9 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { StyleSheet, View, Text, SafeAreaView, FlatList } from "react-native";
 import { useState, useEffect } from "react";
 import { formatDate } from "../helpers/utils";
+
+import * as SecureStore from 'expo-secure-store';
+
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import { Collapsible } from "@/components/Collapsible";
@@ -17,6 +20,20 @@ import {
   SourceSerifPro_600SemiBold,
 } from '@expo-google-fonts/source-serif-pro';
 
+async function getToken(key) {
+  try {
+    let result = await SecureStore.getItemAsync(key);
+    if (result) {
+      console.log("Token: ", result);
+      alert("🔐 Here's your value 🔐 \n" + result);
+    } else {
+      alert('No values stored under that key.');
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 // import {API_TOKEN} from '@env'
 
 export default function Assessments() {
@@ -25,12 +42,14 @@ export default function Assessments() {
 
   const fetchAssessmentDetail = async (assessmentData) => {
     try {
+      const token = await getToken("token");
       const responses = await assessmentData.map(res => {
         return fetch(res.api_url, {
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
+            'Authorization': `'Token ${token}'`
             // 'Authorization': 'Token 067a9010faf05335990c711dc405083da4366e89'
-            'Authorization': 'Token 1d9f37cf23238e688ec018a8ec57a9ee19969332'
+            // 'Authorization': 'Token 1d9f37cf23238e688ec018a8ec57a9ee19969332'
           }
         });
       });
@@ -50,8 +69,8 @@ export default function Assessments() {
       const response = await fetch("http://localhost:8000/api/assessmentsessions/", {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
-          // 'Authorization': 'Token 067a9010faf05335990c711dc405083da4366e89'
-          'Authorization': 'Token 1d9f37cf23238e688ec018a8ec57a9ee19969332'
+          'Authorization': 'Token 067a9010faf05335990c711dc405083da4366e89'
+          // 'Authorization': 'Token 1d9f37cf23238e688ec018a8ec57a9ee19969332'
         }
       });
 
@@ -79,10 +98,6 @@ export default function Assessments() {
   console.log("assessments: ", assessments);
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Assessments</Text>
-      </View>
-
       <FlatList
         data={assessments}
         renderItem={renderItem}
