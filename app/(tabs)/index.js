@@ -1,13 +1,18 @@
+
 import { Image, StyleSheet, Platform, Text } from 'react-native';
 import { LoginForm } from "@/components/loginForm";
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useUser } from '@/components/UserContext';
+import { Home } from "@/components/Home";
 
 import * as SecureStore from 'expo-secure-store';
 
 
-
-
 export default function HomeScreen() {
+  const {user, setUser} = useUser();
+
+  console.log('userDataUpTop', user)
+
   async function saveToken(key, value) {
     try {
       await SecureStore.setItemAsync(key, value);
@@ -41,6 +46,8 @@ export default function HomeScreen() {
 
       if (data.token) {
         await saveToken("token", data.token);
+        setUser(userData);
+
       } else {
         console.log('No token received');
       }
@@ -50,10 +57,13 @@ export default function HomeScreen() {
     }
   }
 
+  console.log('userDatabeforeReturn', user)
 
   return (
     <SafeAreaView>
-      <LoginForm logInUser={logInUser} />
+      {!user &&
+        <LoginForm logInUser={logInUser} />}
+        {user &&  <Home/>}
     </SafeAreaView>
   );
 }

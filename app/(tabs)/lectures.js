@@ -1,37 +1,27 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { StyleSheet, View, Text, SafeAreaView, FlatList } from "react-native";
-import { useState, useEffect } from "react";
-import { formatDate } from "../helpers/utils";
+import {StyleSheet, View, Text, SafeAreaView, FlatList} from "react-native";
+import {useState, useEffect} from "react";
+import {GestureHandlerRootView} from "react-native-gesture-handler";
 import { useUser } from '@/components/UserContext';
 
 import * as SecureStore from 'expo-secure-store';
 
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-
-import { Collapsible } from "@/components/Collapsible";
-import { ExternalLink } from "@/components/ExternalLink";
+import {Collapsible} from "@/components/Collapsible";
+import {ExternalLink} from "@/components/ExternalLink";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
-import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
-import { ScrollView } from "react-native-gesture-handler";
-
-import {
-  useFonts,
-  SourceSerifPro_300Light,
-  SourceSerifPro_600SemiBold,
-} from '@expo-google-fonts/source-serif-pro';
+import {ThemedText} from "@/components/ThemedText";
+import {ThemedView} from "@/components/ThemedView";
+import {ScrollView} from "react-native-gesture-handler";
 
 
-
-
-export default function Assessments() {
-  const [assessments, setAssessments] = useState([]);
+export default function Lectures() {
+  const [lectures, setLectures] = useState([]);
   const [token, setToken] = useState('');
 
   const {user} = useUser();
   console.log(user)
   console.log('token', token)
-  
+
   async function getToken(key) {
     try {
       let result = await SecureStore.getItemAsync(key);
@@ -47,10 +37,10 @@ export default function Assessments() {
   }
 
 
-  const fetchAssessmentDetail = async (assessmentData) => {
+  const fetchLectureDetail = async (lectureData) => {
     try {
       const token = await getToken("token");
-      const responses = assessmentData.map(res => fetch(res.api_url, {
+      const responses = lectureData.map(res => fetch(res.api_url, {
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
             'Authorization': `Token ${token}`
@@ -59,21 +49,21 @@ export default function Assessments() {
       );
       const jsonProms = await Promise.all(responses);
       const data = await Promise.all(jsonProms.map(r => r.json()));
-      setAssessments(data);
+      setLectures(data);
 
     } catch (error) {
       console.error(error);
     }
   };
 
-  const fetchAssessments = async () => {
+  const fetchLectures = async () => {
     try {
       const token = await getToken("token");
       if (!token) {
         console.error("No token available");
         return;
       }
-      const response = await fetch("http://localhost:8000/api/assessmentsessions/", {
+      const response = await fetch("http://localhost:8000/api/lecturesessions/", {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
           'Authorization': `Token ${token}`
@@ -81,26 +71,25 @@ export default function Assessments() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch assessments');
+        throw new Error('Failed to fetch lectures');
       }
 
       const data = await response.json();
-      fetchAssessmentDetail(data.results);
+      fetchLectureDetail(data.results);
 
     } catch (error) {
-      console.error('Error fetching assessments:', error);
+      console.error('Error fetching lectures:', error);
     }
   };
 
   useEffect(() => {
-    fetchAssessments();
+    fetchLectures();
   }, []);
 
   const renderItem = ({ item }) => (
     <View style={styles.card}>
       <Text style={styles.title}>{item.title}</Text>
-      <Text>Start: {formatDate(item.start_at)}</Text>
-      <Text>Due: {formatDate(item.end_at)}</Text>
+      <Text>{item.description}</Text>
     </View>
   );
 
@@ -109,7 +98,7 @@ export default function Assessments() {
     <SafeAreaView style={styles.container}>
       {user &&
       <FlatList
-        data={assessments}
+        data={lectures}
         renderItem={renderItem}
         keyExtractor={(item) => item.title}
       ></FlatList>}

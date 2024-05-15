@@ -2,6 +2,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { StyleSheet, View, Text, SafeAreaView, FlatList } from "react-native";
 import { useState, useEffect } from "react";
 import { formatDate } from "../helpers/utils";
+import { useUser } from '@/components/UserContext';
 
 import * as SecureStore from 'expo-secure-store';
 
@@ -20,24 +21,27 @@ import {
   SourceSerifPro_600SemiBold,
 } from '@expo-google-fonts/source-serif-pro';
 
-async function getToken(key) {
-  try {
-    let result = await SecureStore.getItemAsync(key);
-    if (result) {
-      console.log("Token: ", result);
-      alert("🔐 Here's your value 🔐 \n" + result);
-    } else {
-      alert('No values stored under that key.');
-    }
-  } catch (error) {
-    console.log(error);
-  }
-}
+
 
 
 export default function Exercises() {
   const [exercises, setExercises] = useState([]);
+  const [token, setToken] = useState('');
+  const {user} = useUser();
 
+  async function getToken(key) {
+    try {
+      let result = await SecureStore.getItemAsync(key);
+      if (result) {
+        setToken(result);
+        return result;
+      } else {
+        alert('No values stored under that key.');
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   const fetchExerciseData = async (exerciseData) => {
     console.log(exerciseData)
@@ -48,15 +52,12 @@ export default function Exercises() {
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
             'Authorization': `Token ${token}`
-            // 'Authorization': 'Token 067a9010faf05335990c711dc405083da4366e89'
-            // 'Authorization': 'Token 1d9f37cf23238e688ec018a8ec57a9ee19969332'
           }
         });
       });
 
       const jsonProms = await Promise.all(responses);
-      const promises = jsonProms.map(r => r.json());
-      const data = await Promise.all(promises);
+      const data = await Promise.all(jsonProms.map(r => r.json()));
       setExercises(data);
 
     } catch (error) {
@@ -67,20 +68,26 @@ export default function Exercises() {
   const fetchExercises = async () => {
     try {
       const token = await getToken("token");
+      if (!token) {
+        console.error("No token available");
+        return;
+      }
       const response = await fetch("http://localhost:8000/api/exercisesessions/", {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
           'Authorization': `Token ${token}`
-          // 'Authorization': 'Token 1d9f37cf23238e688ec018a8ec57a9ee19969332'
         }
       });
 
-      const data = await response.json();
+      if (!response.ok) {
+        throw new Error('Failed to fetch exercises');
+      }
 
+      const data = await response.json();
       fetchExerciseData(data.results);
 
     } catch (error) {
-      console.error(error);
+      console.error('Error fetching exercises:', error);
     }
   };
 
@@ -98,11 +105,12 @@ export default function Exercises() {
   console.log("exercises: ", exercises);
   return (
     <SafeAreaView style={styles.container}>
+      {user &&
       <FlatList
         data={exercises}
         renderItem={renderItem}
         keyExtractor={(item) => item.title}
-      ></FlatList>
+      ></FlatList>}
     </SafeAreaView>
   );
 }
