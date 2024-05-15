@@ -1,26 +1,27 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
-import {StyleSheet, View, Text, SafeAreaView, FlatList} from "react-native";
-import {useState, useEffect} from "react";
-import {GestureHandlerRootView} from "react-native-gesture-handler";
+import { StyleSheet, View, Text, SafeAreaView, FlatList } from "react-native";
+import { useState, useEffect } from "react";
+import { formatDate } from "../helpers/utils";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useUser } from '@/components/UserContext';
 
 import * as SecureStore from 'expo-secure-store';
 
-import {Collapsible} from "@/components/Collapsible";
-import {ExternalLink} from "@/components/ExternalLink";
+import { Collapsible } from "@/components/Collapsible";
+import { ExternalLink } from "@/components/ExternalLink";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
-import {ThemedText} from "@/components/ThemedText";
-import {ThemedView} from "@/components/ThemedView";
-import {ScrollView} from "react-native-gesture-handler";
+import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
+import { ScrollView } from "react-native-gesture-handler";
 
 
 export default function Lectures() {
   const [lectures, setLectures] = useState([]);
   const [token, setToken] = useState('');
 
-  const {user} = useUser();
-  console.log(user)
-  console.log('token', token)
+  const { user } = useUser();
+  console.log(user);
+  console.log('token', token);
 
   async function getToken(key) {
     try {
@@ -41,11 +42,11 @@ export default function Lectures() {
     try {
       const token = await getToken("token");
       const responses = lectureData.map(res => fetch(res.api_url, {
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'Authorization': `Token ${token}`
-          }
-        })
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Authorization': `Token ${token}`
+        }
+      })
       );
       const jsonProms = await Promise.all(responses);
       const data = await Promise.all(jsonProms.map(r => r.json()));
@@ -89,7 +90,8 @@ export default function Lectures() {
   const renderItem = ({ item }) => (
     <View style={styles.card}>
       <Text style={styles.title}>{item.title}</Text>
-      <Text>{item.description}</Text>
+      <Text>Start: {formatDate(item.start_at)}</Text>
+      <Text>Due: {formatDate(item.end_at)}</Text>
     </View>
   );
 
@@ -97,11 +99,11 @@ export default function Lectures() {
   return (
     <SafeAreaView style={styles.container}>
       {user &&
-      <FlatList
-        data={lectures}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.title}
-      ></FlatList>}
+        <FlatList
+          data={lectures}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.title}
+        ></FlatList>}
     </SafeAreaView>
 
   );

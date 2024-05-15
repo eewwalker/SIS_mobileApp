@@ -1,8 +1,12 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { StyleSheet, View, Text, SafeAreaView, FlatList } from "react-native";
+import { StyleSheet, View, Text, SafeAreaView, FlatList, TouchableOpacity } from "react-native";
 import { useState, useEffect } from "react";
 import { formatDate } from "../helpers/utils";
 import { useUser } from '@/components/UserContext';
+import { DetailView } from '@/components/DetailView';
+
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import * as SecureStore from 'expo-secure-store';
 
@@ -23,15 +27,17 @@ import {
 
 
 
+const Stack = createNativeStackNavigator();
 
 export default function Assessments() {
   const [assessments, setAssessments] = useState([]);
   const [token, setToken] = useState('');
+  const [assessment, setAssessment] = useState(false);
 
-  const {user} = useUser();
-  console.log(user)
-  console.log('token', token)
-  
+  const { user } = useUser();
+  console.log(user);
+  console.log('token', token);
+
   async function getToken(key) {
     try {
       let result = await SecureStore.getItemAsync(key);
@@ -46,16 +52,15 @@ export default function Assessments() {
     }
   }
 
-
   const fetchAssessmentDetail = async (assessmentData) => {
     try {
       const token = await getToken("token");
       const responses = assessmentData.map(res => fetch(res.api_url, {
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'Authorization': `Token ${token}`
-          }
-        })
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Authorization': `Token ${token}`
+        }
+      })
       );
       const jsonProms = await Promise.all(responses);
       const data = await Promise.all(jsonProms.map(r => r.json()));
@@ -96,23 +101,30 @@ export default function Assessments() {
     fetchAssessments();
   }, []);
 
+  const goBack = () => {
+    setAssessment(false);
+  };
+
   const renderItem = ({ item }) => (
-    <View style={styles.card}>
-      <Text style={styles.title}>{item.title}</Text>
-      <Text>Start: {formatDate(item.start_at)}</Text>
-      <Text>Due: {formatDate(item.end_at)}</Text>
-    </View>
+    <TouchableOpacity onPress={() => setAssessment(item)}>
+      <View style={styles.card}>
+        <Text style={styles.title}>{item.title}</Text>
+        <Text>Start: {formatDate(item.start_at)}</Text>
+        <Text>Due: {formatDate(item.end_at)}</Text>
+      </View>
+    </TouchableOpacity >
   );
 
 
   return (
     <SafeAreaView style={styles.container}>
-      {user &&
-      <FlatList
-        data={assessments}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.title}
-      ></FlatList>}
+      {user && !assessment &&
+        <FlatList
+          data={assessments}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.title}
+        ></FlatList>}
+      {assessment && <DetailView item={assessment} goBack={goBack} />}
     </SafeAreaView>
 
   );
