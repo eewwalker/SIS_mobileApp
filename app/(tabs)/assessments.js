@@ -26,14 +26,13 @@ import {
 export default function Assessments() {
   const [assessments, setAssessments] = useState([]);
   const [token, setToken] = useState('');
-
+  console.log('token', token)
   async function getToken(key) {
     try {
       let result = await SecureStore.getItemAsync(key);
       if (result) {
-        console.log("Token: ", result);
         setToken(result);
-        alert("🔐 Here's your value 🔐 \n" + result);
+        return result;
       } else {
         alert('No values stored under that key.');
       }
@@ -45,17 +44,14 @@ export default function Assessments() {
 
   const fetchAssessmentDetail = async (assessmentData) => {
     try {
-      // const token = await getToken("token");
-      const responses = assessmentData.map(res => { fetch(res.api_url, {
+      const token = await getToken("token");
+      const responses = assessmentData.map(res => fetch(res.api_url, {
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
             'Authorization': `Token ${token}`
-            // 'Authorization': 'Token 067a9010faf05335990c711dc405083da4366e89'
-            // 'Authorization': 'Token 1d9f37cf23238e688ec018a8ec57a9ee19969332'
           }
-        });
-      });
-
+        })
+      );
       const jsonProms = await Promise.all(responses);
       const data = await Promise.all(jsonProms.map(r => r.json()));
       setAssessments(data);
@@ -67,7 +63,7 @@ export default function Assessments() {
 
   const fetchAssessments = async () => {
     try {
-      // const token = await getToken("token");
+      const token = await getToken("token");
       if (!token) {
         console.error("No token available");
         return;
@@ -76,7 +72,6 @@ export default function Assessments() {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
           'Authorization': `Token ${token}`
-          // 'Authorization': 'Token 1d9f37cf23238e688ec018a8ec57a9ee19969332'
         }
       });
 
@@ -85,7 +80,6 @@ export default function Assessments() {
       }
 
       const data = await response.json();
-
       fetchAssessmentDetail(data.results);
 
     } catch (error) {
@@ -105,15 +99,23 @@ export default function Assessments() {
     </View>
   );
 
-  console.log("assessments: ", assessments);
+  async function deleteToken(){
+    await SecureStore.deleteItemAsync('token');
+    setToken('');
+  }
+
   return (
     <SafeAreaView style={styles.container}>
+      <Text onPress={deleteToken}>Delete Token</Text>
+      {token ?
       <FlatList
         data={assessments}
         renderItem={renderItem}
         keyExtractor={(item) => item.title}
       ></FlatList>
+    :  <Text>{token} </Text>}
     </SafeAreaView>
+
   );
 }
 

@@ -4,14 +4,15 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import * as SecureStore from 'expo-secure-store';
 
+
+
+
 export default function HomeScreen() {
-
-
   async function saveToken(key, value) {
     try {
       await SecureStore.setItemAsync(key, value);
-      console.log('success');
-      console.log('Token saved successfully');
+      console.log('token saved')
+
     } catch (error) {
       console.log('Error saving token:', error);
     }
@@ -37,7 +38,7 @@ export default function HomeScreen() {
         }
 
       const data = await resp.json();
-      console.log('Data received:', data);
+
       if (data.token) {
         await saveToken("token", data.token);
       } else {
