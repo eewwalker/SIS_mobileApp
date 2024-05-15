@@ -29,8 +29,8 @@ export default function Assessments() {
         return fetch(res.api_url, {
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
-            'Authorization': 'Token 067a9010faf05335990c711dc405083da4366e89'
-            // 'Authorization': 'Token 1d9f37cf23238e688ec018a8ec57a9ee19969332'
+            // 'Authorization': 'Token 067a9010faf05335990c711dc405083da4366e89'
+            'Authorization': 'Token 1d9f37cf23238e688ec018a8ec57a9ee19969332'
           }
         });
       });
@@ -50,8 +50,8 @@ export default function Assessments() {
       const response = await fetch("http://localhost:8000/api/assessmentsessions/", {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
-          'Authorization': 'Token 067a9010faf05335990c711dc405083da4366e89'
-          // 'Authorization': 'Token 1d9f37cf23238e688ec018a8ec57a9ee19969332'
+          // 'Authorization': 'Token 067a9010faf05335990c711dc405083da4366e89'
+          'Authorization': 'Token 1d9f37cf23238e688ec018a8ec57a9ee19969332'
         }
       });
 
