@@ -10,9 +10,10 @@ export default function HomeScreen() {
   async function saveToken(key, value) {
     try {
       await SecureStore.setItemAsync(key, value);
-
+      console.log('success');
+      console.log('Token saved successfully');
     } catch (error) {
-      console.log(error);
+      console.log('Error saving token:', error);
     }
   }
 
@@ -30,12 +31,21 @@ export default function HomeScreen() {
             'Content-Type': 'application/json',
           },
         });
+
+        if (!resp.ok) {
+          throw new Error('Network response was not ok');
+        }
+
       const data = await resp.json();
-      //console.log('data', data);
-      saveToken("token", data.token);
+      console.log('Data received:', data);
+      if (data.token) {
+        await saveToken("token", data.token);
+      } else {
+        console.log('No token received');
+      }
 
     } catch (error) {
-      console.log(error);
+      console.log('Error logging in user:', error);
     }
   }
 

@@ -20,33 +20,31 @@ import {
   SourceSerifPro_600SemiBold,
 } from '@expo-google-fonts/source-serif-pro';
 
-
-
-
-export default function Assessments() {
-  const [assessments, setAssessments] = useState([]);
-  const [token, setToken] = useState('');
-
-  async function getToken(key) {
-    try {
-      let result = await SecureStore.getItemAsync(key);
-      if (result) {
-        console.log("Token: ", result);
-        setToken(result);
-        alert("🔐 Here's your value 🔐 \n" + result);
-      } else {
-        alert('No values stored under that key.');
-      }
-    } catch (error) {
-      console.log(error);
+async function getToken(key) {
+  try {
+    let result = await SecureStore.getItemAsync(key);
+    if (result) {
+      console.log("Token: ", result);
+      alert("🔐 Here's your value 🔐 \n" + result);
+    } else {
+      alert('No values stored under that key.');
     }
+  } catch (error) {
+    console.log(error);
   }
+}
 
 
-  const fetchAssessmentDetail = async (assessmentData) => {
+export default function Exercises() {
+  const [exercises, setExercises] = useState([]);
+
+
+  const fetchExerciseData = async (exerciseData) => {
+    console.log(exerciseData)
     try {
-      // const token = await getToken("token");
-      const responses = assessmentData.map(res => { fetch(res.api_url, {
+      const token = await getToken("token");
+      const responses = await exerciseData.map(res => {
+        return fetch(res.api_url, {
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
             'Authorization': `Token ${token}`
@@ -57,22 +55,19 @@ export default function Assessments() {
       });
 
       const jsonProms = await Promise.all(responses);
-      const data = await Promise.all(jsonProms.map(r => r.json()));
-      setAssessments(data);
+      const promises = jsonProms.map(r => r.json());
+      const data = await Promise.all(promises);
+      setExercises(data);
 
     } catch (error) {
       console.error(error);
     }
   };
 
-  const fetchAssessments = async () => {
+  const fetchExercises = async () => {
     try {
-      // const token = await getToken("token");
-      if (!token) {
-        console.error("No token available");
-        return;
-      }
-      const response = await fetch("http://localhost:8000/api/assessmentsessions/", {
+      const token = await getToken("token");
+      const response = await fetch("http://localhost:8000/api/exercisesessions/", {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
           'Authorization': `Token ${token}`
@@ -80,36 +75,31 @@ export default function Assessments() {
         }
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch assessments');
-      }
-
       const data = await response.json();
 
-      fetchAssessmentDetail(data.results);
+      fetchExerciseData(data.results);
 
     } catch (error) {
-      console.error('Error fetching assessments:', error);
+      console.error(error);
     }
   };
 
   useEffect(() => {
-    fetchAssessments();
+    fetchExercises();
   }, []);
 
   const renderItem = ({ item }) => (
     <View style={styles.card}>
       <Text style={styles.title}>{item.title}</Text>
-      <Text>Start: {formatDate(item.start_at)}</Text>
-      <Text>Due: {formatDate(item.end_at)}</Text>
+      <Text>{item.description}</Text>
     </View>
   );
 
-  console.log("assessments: ", assessments);
+  console.log("exercises: ", exercises);
   return (
     <SafeAreaView style={styles.container}>
       <FlatList
-        data={assessments}
+        data={exercises}
         renderItem={renderItem}
         keyExtractor={(item) => item.title}
       ></FlatList>
