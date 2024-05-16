@@ -1,23 +1,11 @@
-import Ionicons from "@expo/vector-icons/Ionicons";
+
 import { StyleSheet, View, Text, SafeAreaView, FlatList, TouchableOpacity } from "react-native";
 import { useState, useEffect } from "react";
 import { formatDate } from "../helpers/utils";
 import { useUser } from '@/components/UserContext';
 import { DetailView } from '@/components/DetailView';
 
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-
 import * as SecureStore from 'expo-secure-store';
-
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-
-import { Collapsible } from "@/components/Collapsible";
-import { ExternalLink } from "@/components/ExternalLink";
-import ParallaxScrollView from "@/components/ParallaxScrollView";
-import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
-import { ScrollView } from "react-native-gesture-handler";
 
 import {
   useFonts,
@@ -26,17 +14,12 @@ import {
 } from '@expo-google-fonts/source-serif-pro';
 
 
-
-const Stack = createNativeStackNavigator();
-
 export default function Assessments() {
   const [assessments, setAssessments] = useState([]);
   const [token, setToken] = useState('');
   const [assessment, setAssessment] = useState(false);
 
   const { user } = useUser();
-  console.log(user);
-  console.log('token', token);
 
   async function getToken(key) {
     try {

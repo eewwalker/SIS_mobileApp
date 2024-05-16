@@ -1,19 +1,11 @@
-import Ionicons from "@expo/vector-icons/Ionicons";
-import { StyleSheet, View, Text, SafeAreaView, FlatList } from "react-native";
+
+import { StyleSheet, View, Text, SafeAreaView, FlatList, TouchableOpacity } from "react-native";
 import { useState, useEffect } from "react";
 import { formatDate } from "../helpers/utils";
 import { useUser } from '@/components/UserContext';
+import { DetailView } from '@/components/DetailView';
 
 import * as SecureStore from 'expo-secure-store';
-
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-
-import { Collapsible } from "@/components/Collapsible";
-import { ExternalLink } from "@/components/ExternalLink";
-import ParallaxScrollView from "@/components/ParallaxScrollView";
-import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
-import { ScrollView } from "react-native-gesture-handler";
 
 import {
   useFonts,
@@ -22,11 +14,11 @@ import {
 } from '@expo-google-fonts/source-serif-pro';
 
 
-
-
 export default function Exercises() {
   const [exercises, setExercises] = useState([]);
   const [token, setToken] = useState('');
+  const [exercise, setExercise] = useState(false);
+
   const {user} = useUser();
 
   async function getToken(key) {
@@ -95,22 +87,28 @@ export default function Exercises() {
     fetchExercises();
   }, []);
 
+  const goBack = () => {
+    setExercise(false);
+  };
+
   const renderItem = ({ item }) => (
+    <TouchableOpacity onPress={() => setExercise(item)}>
     <View style={styles.card}>
       <Text style={styles.title}>{item.title}</Text>
-      <Text>{item.description}</Text>
+      <Text>{formatDate(item.exerciselabsession_set[0].start_at)}</Text>
     </View>
+    </TouchableOpacity >
   );
 
-  console.log("exercises: ", exercises);
   return (
     <SafeAreaView style={styles.container}>
-      {user &&
+      {user && !exercise &&
       <FlatList
         data={exercises}
         renderItem={renderItem}
         keyExtractor={(item) => item.title}
       ></FlatList>}
+      {exercise && <DetailView item= {exercise} goBack={goBack}/>}
     </SafeAreaView>
   );
 }

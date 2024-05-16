@@ -1,27 +1,19 @@
-import Ionicons from "@expo/vector-icons/Ionicons";
-import { StyleSheet, View, Text, SafeAreaView, FlatList } from "react-native";
+
+import { StyleSheet, View, Text, SafeAreaView, FlatList,TouchableOpacity } from "react-native";
 import { useState, useEffect } from "react";
 import { formatDate } from "../helpers/utils";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { DetailView } from '@/components/DetailView';
 import { useUser } from '@/components/UserContext';
 
 import * as SecureStore from 'expo-secure-store';
-
-import { Collapsible } from "@/components/Collapsible";
-import { ExternalLink } from "@/components/ExternalLink";
-import ParallaxScrollView from "@/components/ParallaxScrollView";
-import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
-import { ScrollView } from "react-native-gesture-handler";
 
 
 export default function Lectures() {
   const [lectures, setLectures] = useState([]);
   const [token, setToken] = useState('');
+  const [lecture, setLecture] = useState(false);
 
   const { user } = useUser();
-  console.log(user);
-  console.log('token', token);
 
   async function getToken(key) {
     try {
@@ -87,23 +79,29 @@ export default function Lectures() {
     fetchLectures();
   }, []);
 
+  const goBack = () => {
+    setLecture(false);
+  };
+
   const renderItem = ({ item }) => (
+    <TouchableOpacity onPress={() => setLecture(item)}>
     <View style={styles.card}>
       <Text style={styles.title}>{item.title}</Text>
       <Text>Start: {formatDate(item.start_at)}</Text>
-      <Text>Due: {formatDate(item.end_at)}</Text>
     </View>
+    </TouchableOpacity >
   );
 
 
   return (
     <SafeAreaView style={styles.container}>
-      {user &&
+      {user && !lecture &&
         <FlatList
           data={lectures}
           renderItem={renderItem}
           keyExtractor={(item) => item.title}
         ></FlatList>}
+         {lecture && <DetailView item={lecture} goBack={goBack} />}
     </SafeAreaView>
 
   );
