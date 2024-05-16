@@ -1,14 +1,22 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, SectionList, StyleSheet, SafeAreaView } from "react-native";
+import { View, Text, SectionList, StyleSheet, SafeAreaView, ActivityIndicator } from "react-native";
 import { getData } from "@/app/helpers/api";
-import { compareDates, groupObjectsByStartDate } from "@/app/helpers/utils";
+import { compareDates, sortByDate, formatDate } from "@/app/helpers/utils";
 import { useUser } from '@/components/UserContext';
 
 
 export function Home() {
   const [data, setData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const { user } = useUser();
+
+  const getCohort = () => {
+    let urlString = item.cohort;
+    let parts = urlString.split('/');
+    let cohort = parts[parts.length - 2];
+    return cohort;
+  };
 
   async function fetchData() {
     const assessments = await getData('assessmentsessions');
@@ -17,55 +25,56 @@ export function Home() {
     const allData = [...assessments, ...exercises, ...lectures];
 
     const filteredDates = compareDates(allData);
-    const sortedDates = groupObjectsByStartDate(filteredDates);
+    const sortedDates = sortByDate(filteredDates)
 
-    // console.log('data-1:', data);
-
-    const formattedData = sortedDates.map(section => ({
-      title: new Date(section.date).toDateString(), // Convert date to a readable format
-      data: section.elements
-    }));
-
-    setData(formattedData);
+    setData(sortedDates);
+    setIsLoading(false);
   }
 
   useEffect(() => {
     fetchData();
   }, []);
 
-  // const data2 = [
-  //   { date: "2024-05-18T18:00:23.218370-07:00", elements: [{ title: "Event 1" }] },
-  //   { date: "2024-06-10T18:00:18.337307-07:00", elements: [{ title: "Event 2" }] },
-  //   { date: "2024-06-10T18:00:33.780518-07:00", elements: [{ title: "Event 3" }] },
-  // ];
-
-
-
   console.log('data:', data);
+  console.log('data[0]', data[0])
+
+  const groupedData = data.reduce((acc, item) => {
+    const date = formatDate(item.start_at);
+    if (!acc[date]) {
+      acc[date] = [];
+    }
+    acc[date].push(item);
+    return acc;
+  }, {});
+
+  const sections = Object.keys(groupedData).map((date) => ({
+    title: date,
+    data: groupedData[date],
+  }));
+
   return (
     <SafeAreaView>
-      <Text>Home</Text>
-      {data.length > 0 &&
-        <SectionList
-          sections={data}
-          keyExtractor={(item, index) => item.title + index}
-          renderItem={({ item }) => (
-            // <View>
-            //   <Text>{item.title}</Text>
-            // </View>
-            <View>
-              {item.data.map((element, index) => (
-                <Text key={index}>{element.title}</Text>
-              ))}
-            </View>
-          )}
-          renderSectionHeader={({ section: { title } }) => (
-            <Text style={styles.header}>{title}</Text>
-          )}
-        // renderSectionHeader={({ section: { date } }) => (
-        //   <Text style={styles.header}>{date}</Text>
-        // )}
-        />}
+      {isLoading && (
+      <View style={[styles.loader, styles.horizontal]}>
+        <ActivityIndicator size="large" color="#e46b65" />
+      </View>
+    )}
+      {!isLoading && (
+      <View>
+      <SectionList
+        sections={sections}
+        keyExtractor={(item) => item.title.toString()}
+        renderItem={({ item }) => (
+          <View style={styles.item}>
+            <Text style={styles.title}>{item.title}</Text>
+          </View>
+        )}
+        renderSectionHeader={({ section: { title } }) => (
+          <Text style={styles.sectionHeader}>{title}</Text>
+        )}
+      />
+    </View>
+      )}
 
     </SafeAreaView>
   );
@@ -82,10 +91,19 @@ const styles = StyleSheet.create({
     marginVertical: 8,
   },
   header: {
-    fontSize: 32,
+    fontSize: 12,
     backgroundColor: '#fff',
   },
   title: {
-    fontSize: 24,
+    fontSize: 10,
   },
+  loader: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  horizontal: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    padding: 10,
+  }
 });
