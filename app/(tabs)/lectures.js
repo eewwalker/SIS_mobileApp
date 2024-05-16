@@ -6,7 +6,10 @@ import { DetailView } from '@/components/DetailView';
 import { useUser } from '@/components/UserContext';
 import { getData } from '../helpers/api';
 
-
+/** Lectures Tab
+ * State: lectures, lecture, isLoading
+ * Props: None
+ */
 export default function Lectures() {
   const [lectures, setLectures] = useState([]);
   const [lecture, setLecture] = useState(false);
@@ -14,6 +17,7 @@ export default function Lectures() {
 
   const { user } = useUser();
 
+/** Get all lecturesession data */
   async function fetchData() {
     const data = await getData('lecturesessions');
     setLectures(data);
@@ -24,10 +28,12 @@ export default function Lectures() {
     fetchData();
   }, []);
 
+  /** Return to list view of lectures */
   const goBack = () => {
     setLecture(false);
   };
 
+  /** Render assessment data */
   const renderItem = ({ item }) => (
     <TouchableOpacity onPress={() => setLecture(item)}>
       <View style={styles.card}>

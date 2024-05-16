@@ -6,7 +6,10 @@ import { useUser } from '@/components/UserContext';
 import { DetailView } from '@/components/DetailView';
 import { getData } from '../helpers/api';
 
-
+/** Exercises Tab
+ * State: exercises, exercise, isLoading
+ * Props: None
+ */
 export default function Exercises() {
   const [exercises, setExercises] = useState([]);
   const [exercise, setExercise] = useState(false);
@@ -14,7 +17,7 @@ export default function Exercises() {
 
   const { user } = useUser();
 
-
+/** Get all exercisesession data */
   async function fetchData() {
     const data = await getData('exercisesessions');
     setExercises(data);
@@ -25,10 +28,12 @@ export default function Exercises() {
     fetchData();
   }, []);
 
+  /** Return to list view of exercises */
   const goBack = () => {
     setExercise(false);
   };
 
+  /** Render exercise data */
   const renderItem = ({ item }) => (
     <TouchableOpacity onPress={() => setExercise(item)}>
       <View style={styles.card}>

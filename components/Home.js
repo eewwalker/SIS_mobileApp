@@ -28,8 +28,6 @@ export function Home() {
     fetchData();
   }, []);
 
-  console.log('data:', data);
-  console.log('data[0]', data[0]);
 
   const groupedData = data.reduce((acc, item) => {
     const date = formatDate(item.start_at);
@@ -49,13 +47,15 @@ export function Home() {
     <SafeAreaView style={styles.container}>
       <View style={styles.welcomeContainer}>
         <Text style={styles.welcomeTitle}>Welcome {user.username}!</Text>
+        <Text style={styles.upcoming}>Upcoming:</Text>
       </View>
-      <Text style={styles.upcoming}>Upcoming:</Text>
+
       {isLoading && (
         <View style={[styles.loader, styles.horizontal]}>
           <ActivityIndicator size="large" color="#e46b65" />
         </View>
       )}
+
       {!isLoading && (
         <View style={styles.listContainer}>
           <SectionList

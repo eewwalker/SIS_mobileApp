@@ -9,7 +9,10 @@ import { useUser } from '@/components/UserContext';
 import { DetailView } from '@/components/DetailView';
 import { getData } from '../helpers/api';
 
-
+/** Assessments Tab
+ * State: assessments, assessment, isLoading
+ * Props: None
+ */
 export default function Assessments() {
   const [assessments, setAssessments] = useState([]);
   const [assessment, setAssessment] = useState(false);
@@ -17,6 +20,7 @@ export default function Assessments() {
 
   const { user } = useUser();
 
+  /** Get all assessmentsession data */
   async function fetchData() {
     const data = await getData('assessmentsessions');
     setAssessments(data);
@@ -27,10 +31,12 @@ export default function Assessments() {
     fetchData();
   }, []);
 
+  /** Return to list view of assessments */
   const goBack = () => {
     setAssessment(false);
   };
 
+  /** Render assessment data */
   const renderItem = ({ item }) => (
     <TouchableOpacity onPress={() => setAssessment(item)}>
       <View style={styles.card}>

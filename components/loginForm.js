@@ -8,12 +8,16 @@ import { Image, Pressable, SafeAreaView, StyleSheet, Text, TextInput, View }
     loading: true
   }
 
+/** Form to render when user is not logged in
+ * State: userData
+ * Props: logInUser
+ */
 export function LoginForm({logInUser}) {
-  const [userData,setuserData] = useState(initialData);
+  const [userData,setUserData] = useState(initialData);
 
   /** update username in state */
   function updateUserName(evt) {
-    setuserData(fData=> ({
+    setUserData(fData=> ({
       ...fData,
       username: evt,
 
@@ -22,7 +26,7 @@ export function LoginForm({logInUser}) {
 
   /** update password in state */
   function updatePassword(evt){
-    setuserData(fData=> ({
+    setUserData(fData=> ({
       ...fData,
       password: evt,
 
@@ -32,7 +36,7 @@ export function LoginForm({logInUser}) {
   /** handle submit and send userData to parent function */
   function handleSubmit(evt) {
     logInUser(userData);
-    setuserData(initialData);
+    setUserData(initialData);
   }
 
   return(
