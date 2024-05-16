@@ -6,9 +6,9 @@ import { useUser } from '@/components/UserContext';
 
 
 export function Home() {
-  const [data, setData] = useState({});
+  const [data, setData] = useState([]);
 
-const { user } = useUser();
+  const { user } = useUser();
 
   async function fetchData() {
     const assessments = await getData('assessmentsessions');
@@ -19,30 +19,56 @@ const { user } = useUser();
     const filteredDates = compareDates(allData);
     const sortedDates = groupObjectsByStartDate(filteredDates);
 
-    setData(sortedDates);
-    console.log('data', data)
+    // console.log('data-1:', data);
+
+    const formattedData = sortedDates.map(section => ({
+      title: new Date(section.date).toDateString(), // Convert date to a readable format
+      data: section.elements
+    }));
+
+    setData(formattedData);
   }
 
   useEffect(() => {
     fetchData();
   }, []);
 
+  // const data2 = [
+  //   { date: "2024-05-18T18:00:23.218370-07:00", elements: [{ title: "Event 1" }] },
+  //   { date: "2024-06-10T18:00:18.337307-07:00", elements: [{ title: "Event 2" }] },
+  //   { date: "2024-06-10T18:00:33.780518-07:00", elements: [{ title: "Event 3" }] },
+  // ];
+
+
+
+  console.log('data:', data);
   return (
-    <SafeAreaView style={styles.container}>
-    <SectionList
-      sections={data}
-      keyExtractor={(item, index) => item + index}
-      renderItem={({item}) => (
-        <View style={styles.item}>
-          <Text style={styles.title}>{item.title}</Text>
-        </View>
-      )}
-      renderSectionHeader={({section: {title}}) => (
-        <Text style={styles.header}>{title}</Text>
-      )}
-    />
-  </SafeAreaView>
-  )
+    <SafeAreaView>
+      <Text>Home</Text>
+      {data.length > 0 &&
+        <SectionList
+          sections={data}
+          keyExtractor={(item, index) => item.title + index}
+          renderItem={({ item }) => (
+            // <View>
+            //   <Text>{item.title}</Text>
+            // </View>
+            <View>
+              {item.data.map((element, index) => (
+                <Text key={index}>{element.title}</Text>
+              ))}
+            </View>
+          )}
+          renderSectionHeader={({ section: { title } }) => (
+            <Text style={styles.header}>{title}</Text>
+          )}
+        // renderSectionHeader={({ section: { date } }) => (
+        //   <Text style={styles.header}>{date}</Text>
+        // )}
+        />}
+
+    </SafeAreaView>
+  );
 }
 
 const styles = StyleSheet.create({
