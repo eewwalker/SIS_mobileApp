@@ -22,7 +22,6 @@ async function getToken(key) {
 }
 
 const fetchDataDetails = async (results) => {
-  console.log("results:", results);
   try {
     const token = await getToken("token");
     const responses = await results.map(res => {

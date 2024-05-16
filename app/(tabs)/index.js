@@ -11,8 +11,6 @@ import * as SecureStore from 'expo-secure-store';
 export default function HomeScreen() {
   const {user, setUser} = useUser();
 
-  console.log('userDataUpTop', user)
-
   async function saveToken(key, value) {
     try {
       await SecureStore.setItemAsync(key, value);
@@ -56,8 +54,6 @@ export default function HomeScreen() {
       console.log('Error logging in user:', error);
     }
   }
-
-  console.log('userDatabeforeReturn', user)
 
   return (
     <SafeAreaView>
