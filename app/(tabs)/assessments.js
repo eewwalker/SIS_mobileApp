@@ -4,86 +4,24 @@ import { useState, useEffect } from "react";
 import { formatDate } from "../helpers/utils";
 import { useUser } from '@/components/UserContext';
 import { DetailView } from '@/components/DetailView';
-
-import * as SecureStore from 'expo-secure-store';
-
-import {
-  useFonts,
-  SourceSerifPro_300Light,
-  SourceSerifPro_600SemiBold,
-} from '@expo-google-fonts/source-serif-pro';
+import { getData } from '../helpers/api';
 
 
 export default function Assessments() {
   const [assessments, setAssessments] = useState([]);
-  const [token, setToken] = useState('');
   const [assessment, setAssessment] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   const { user } = useUser();
 
-  async function getToken(key) {
-    try {
-      let result = await SecureStore.getItemAsync(key);
-      if (result) {
-        setToken(result);
-        return result;
-      } else {
-        alert('No values stored under that key.');
-      }
-    } catch (error) {
-      console.log(error);
-    }
+  async function fetchData() {
+    const data = await getData('assessmentsessions');
+    setAssessments(data);
+    setIsLoading(false);
   }
 
-  const fetchAssessmentDetail = async (assessmentData) => {
-    try {
-      const token = await getToken("token");
-      const responses = assessmentData.map(res => fetch(res.api_url, {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'Authorization': `Token ${token}`
-        }
-      })
-      );
-      const jsonProms = await Promise.all(responses);
-      const data = await Promise.all(jsonProms.map(r => r.json()));
-      setAssessments(data);
-      setIsLoading(false);
-
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const fetchAssessments = async () => {
-    try {
-      const token = await getToken("token");
-      if (!token) {
-        console.error("No token available");
-        return;
-      }
-      const response = await fetch("http://localhost:8000/api/assessmentsessions/", {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'Authorization': `Token ${token}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch assessments');
-      }
-
-      const data = await response.json();
-      fetchAssessmentDetail(data.results);
-
-    } catch (error) {
-      console.error('Error fetching assessments:', error);
-    }
-  };
-
   useEffect(() => {
-    fetchAssessments();
+    fetchData();
   }, []);
 
   const goBack = () => {
