@@ -11,13 +11,6 @@ export function Home() {
 
   const { user } = useUser();
 
-  const getCohort = () => {
-    let urlString = item.cohort;
-    let parts = urlString.split('/');
-    let cohort = parts[parts.length - 2];
-    return cohort;
-  };
-
   async function fetchData() {
     const assessments = await getData('assessmentsessions');
     const exercises = await getData('exercisesessions');
@@ -25,7 +18,7 @@ export function Home() {
     const allData = [...assessments, ...exercises, ...lectures];
 
     const filteredDates = compareDates(allData);
-    const sortedDates = sortByDate(filteredDates)
+    const sortedDates = sortByDate(filteredDates);
 
     setData(sortedDates);
     setIsLoading(false);
@@ -36,7 +29,7 @@ export function Home() {
   }, []);
 
   console.log('data:', data);
-  console.log('data[0]', data[0])
+  console.log('data[0]', data[0]);
 
   const groupedData = data.reduce((acc, item) => {
     const date = formatDate(item.start_at);
@@ -53,27 +46,31 @@ export function Home() {
   }));
 
   return (
-    <SafeAreaView>
-      {isLoading && (
-      <View style={[styles.loader, styles.horizontal]}>
-        <ActivityIndicator size="large" color="#e46b65" />
+    <SafeAreaView style={styles.container}>
+      <View style={styles.welcomeContainer}>
+        <Text style={styles.welcomeTitle}>Welcome {user.username}!</Text>
       </View>
-    )}
+      <Text style={styles.upcoming}>Upcoming:</Text>
+      {isLoading && (
+        <View style={[styles.loader, styles.horizontal]}>
+          <ActivityIndicator size="large" color="#e46b65" />
+        </View>
+      )}
       {!isLoading && (
-      <View>
-      <SectionList
-        sections={sections}
-        keyExtractor={(item) => item.title.toString()}
-        renderItem={({ item }) => (
-          <View style={styles.item}>
-            <Text style={styles.title}>{item.title}</Text>
-          </View>
-        )}
-        renderSectionHeader={({ section: { title } }) => (
-          <Text style={styles.sectionHeader}>{title}</Text>
-        )}
-      />
-    </View>
+        <View style={styles.listContainer}>
+          <SectionList
+            sections={sections}
+            keyExtractor={(item) => item.title.toString()}
+            renderItem={({ item }) => (
+              <View style={styles.card}>
+                <Text style={styles.title}>{item.title}</Text>
+              </View>
+            )}
+            renderSectionHeader={({ section: { title } }) => (
+              <Text style={styles.sectionHeader}>{title}</Text>
+            )}
+          />
+        </View>
       )}
 
     </SafeAreaView>
@@ -82,20 +79,37 @@ export function Home() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    marginHorizontal: 16,
+    padding: 5
   },
-  item: {
-    backgroundColor: '#f9c2ff',
-    padding: 20,
-    marginVertical: 8,
+  welcomeContainer: {
+    justifyContent: "center",
+    alignItems: 'center',
   },
-  header: {
-    fontSize: 12,
-    backgroundColor: '#fff',
+  welcomeTitle: {
+    fontSize: 35,
+    color: '#e46b65',
   },
-  title: {
-    fontSize: 10,
+  upcoming: {
+    paddingTop: 10,
+    margin: 10,
+    fontSize: 18,
+    fontStyle: 'italic'
+  },
+  card: {
+    height: 70,
+    backgroundColor: "#ffffff",
+    marginTop: 5,
+    marginRight: 10,
+    marginBottom: 5,
+    marginLeft: 10,
+    justifyContent: "center",
+    alignContent: 'center',
+    paddingTop: 5,
+    paddingLeft: 10,
+    borderRadius: 10
+  },
+  listContainer: {
+    padding: 8
   },
   loader: {
     flex: 1,
@@ -106,4 +120,5 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     padding: 10,
   }
+
 });

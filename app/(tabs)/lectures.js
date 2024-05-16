@@ -40,7 +40,10 @@ export default function Lectures() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {isLoading && <View style={[styles.loader, styles.horizontal]}>
+      {!user && <View style={styles.loginContainer}>
+        <Text style={styles.login}>Please Log in first!</Text>
+      </View>}
+      {isLoading && user && <View style={[styles.loader, styles.horizontal]}>
         <ActivityIndicator size="large" color="#e46b65" />
       </View>}
       {user && !lecture && !isLoading &&
@@ -100,5 +103,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     padding: 10,
+  },
+  login: {
+    fontSize: 25,
+    color: '#e46b65',
+  },
+  loginContainer: {
+    justifyContent: "center",
+    alignItems: 'center',
+    paddingTop: 100
   }
 });

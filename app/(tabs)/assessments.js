@@ -1,5 +1,8 @@
 
-import { StyleSheet, View, Text, SafeAreaView, FlatList, TouchableOpacity, ActivityIndicator } from "react-native";
+import {
+  StyleSheet, View, Text, SafeAreaView, FlatList, TouchableOpacity,
+  ActivityIndicator, Alert
+} from "react-native";
 import { useState, useEffect } from "react";
 import { formatDate } from "../helpers/utils";
 import { useUser } from '@/components/UserContext';
@@ -41,7 +44,10 @@ export default function Assessments() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {isLoading && <View style={[styles.loader, styles.horizontal]}>
+      {!user && <View style={styles.loginContainer}>
+        <Text style={styles.login}>Please Log in first!</Text>
+      </View>}
+      {isLoading && user && <View style={[styles.loader, styles.horizontal]}>
         <ActivityIndicator size="large" color="#e46b65" />
       </View>}
       {user && !assessment && !isLoading &&
@@ -101,5 +107,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     padding: 10,
+  },
+  login: {
+    fontSize: 25,
+    color: '#e46b65',
+  },
+  loginContainer: {
+    justifyContent: "center",
+    alignItems: 'center',
+    paddingTop: 100
   }
 });
