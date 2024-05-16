@@ -1,11 +1,12 @@
 
-import { StyleSheet, View, Text, SafeAreaView, FlatList, TouchableOpacity } from "react-native";
+import { StyleSheet, View, Text, SafeAreaView, FlatList, TouchableOpacity, ActivityIndicator } from "react-native";
 import { useState, useEffect } from "react";
 import { formatDate } from "../helpers/utils";
 import { useUser } from '@/components/UserContext';
 import { DetailView } from '@/components/DetailView';
 
 import * as SecureStore from 'expo-secure-store';
+
 
 import {
   useFonts,
@@ -18,8 +19,9 @@ export default function Exercises() {
   const [exercises, setExercises] = useState([]);
   const [token, setToken] = useState('');
   const [exercise, setExercise] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const {user} = useUser();
+  const { user } = useUser();
 
   async function getToken(key) {
     try {
@@ -36,7 +38,7 @@ export default function Exercises() {
   }
 
   const fetchExerciseData = async (exerciseData) => {
-    console.log(exerciseData)
+    console.log(exerciseData);
     try {
       const token = await getToken("token");
       const responses = await exerciseData.map(res => {
@@ -51,6 +53,7 @@ export default function Exercises() {
       const jsonProms = await Promise.all(responses);
       const data = await Promise.all(jsonProms.map(r => r.json()));
       setExercises(data);
+      setIsLoading(false);
 
     } catch (error) {
       console.error(error);
@@ -93,22 +96,25 @@ export default function Exercises() {
 
   const renderItem = ({ item }) => (
     <TouchableOpacity onPress={() => setExercise(item)}>
-    <View style={styles.card}>
-      <Text style={styles.title}>{item.title}</Text>
-      <Text>{formatDate(item.exerciselabsession_set[0].start_at)}</Text>
-    </View>
+      <View style={styles.card}>
+        <Text style={styles.title}>{item.title}</Text>
+        <Text>{formatDate(item.exerciselabsession_set[0].start_at)}</Text>
+      </View>
     </TouchableOpacity >
   );
 
   return (
     <SafeAreaView style={styles.container}>
-      {user && !exercise &&
-      <FlatList
-        data={exercises}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.title}
-      ></FlatList>}
-      {exercise && <DetailView item= {exercise} goBack={goBack}/>}
+      {isLoading && <View style={[styles.loader, styles.horizontal]}>
+        <ActivityIndicator size="large" color="#e46b65" />
+      </View>}
+      {user && !exercise && !isLoading &&
+        <FlatList
+          data={exercises}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.title}
+        ></FlatList>}
+      {exercise && <DetailView item={exercise} goBack={goBack} />}
     </SafeAreaView>
   );
 }
@@ -149,5 +155,15 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 25,
     color: "black",
+  },
+  loader: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  horizontal: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    padding: 10,
   }
+
 });

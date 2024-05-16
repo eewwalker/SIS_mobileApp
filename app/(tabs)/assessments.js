@@ -1,5 +1,5 @@
 
-import { StyleSheet, View, Text, SafeAreaView, FlatList, TouchableOpacity } from "react-native";
+import { StyleSheet, View, Text, SafeAreaView, FlatList, TouchableOpacity, ActivityIndicator } from "react-native";
 import { useState, useEffect } from "react";
 import { formatDate } from "../helpers/utils";
 import { useUser } from '@/components/UserContext';
@@ -18,6 +18,7 @@ export default function Assessments() {
   const [assessments, setAssessments] = useState([]);
   const [token, setToken] = useState('');
   const [assessment, setAssessment] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const { user } = useUser();
 
@@ -48,6 +49,7 @@ export default function Assessments() {
       const jsonProms = await Promise.all(responses);
       const data = await Promise.all(jsonProms.map(r => r.json()));
       setAssessments(data);
+      setIsLoading(false);
 
     } catch (error) {
       console.error(error);
@@ -101,7 +103,10 @@ export default function Assessments() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {user && !assessment &&
+      {isLoading && <View style={[styles.loader, styles.horizontal]}>
+        <ActivityIndicator size="large" color="#e46b65" />
+      </View>}
+      {user && !assessment && !isLoading &&
         <FlatList
           data={assessments}
           renderItem={renderItem}
@@ -149,5 +154,14 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 25,
     color: "black",
+  },
+  loader: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  horizontal: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    padding: 10,
   }
 });

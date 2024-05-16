@@ -1,5 +1,5 @@
 
-import { StyleSheet, View, Text, SafeAreaView, FlatList,TouchableOpacity } from "react-native";
+import { StyleSheet, View, Text, SafeAreaView, FlatList, TouchableOpacity, ActivityIndicator } from "react-native";
 import { useState, useEffect } from "react";
 import { formatDate } from "../helpers/utils";
 import { DetailView } from '@/components/DetailView';
@@ -12,6 +12,7 @@ export default function Lectures() {
   const [lectures, setLectures] = useState([]);
   const [token, setToken] = useState('');
   const [lecture, setLecture] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const { user } = useUser();
 
@@ -43,6 +44,7 @@ export default function Lectures() {
       const jsonProms = await Promise.all(responses);
       const data = await Promise.all(jsonProms.map(r => r.json()));
       setLectures(data);
+      setIsLoading(false);
 
     } catch (error) {
       console.error(error);
@@ -85,23 +87,26 @@ export default function Lectures() {
 
   const renderItem = ({ item }) => (
     <TouchableOpacity onPress={() => setLecture(item)}>
-    <View style={styles.card}>
-      <Text style={styles.title}>{item.title}</Text>
-      <Text>Start: {formatDate(item.start_at)}</Text>
-    </View>
+      <View style={styles.card}>
+        <Text style={styles.title}>{item.title}</Text>
+        <Text>Start: {formatDate(item.start_at)}</Text>
+      </View>
     </TouchableOpacity >
   );
 
 
   return (
     <SafeAreaView style={styles.container}>
-      {user && !lecture &&
+      {isLoading && <View style={[styles.loader, styles.horizontal]}>
+        <ActivityIndicator size="large" color="#e46b65" />
+      </View>}
+      {user && !lecture && !isLoading &&
         <FlatList
           data={lectures}
           renderItem={renderItem}
           keyExtractor={(item) => item.title}
         ></FlatList>}
-         {lecture && <DetailView item={lecture} goBack={goBack} />}
+      {lecture && <DetailView item={lecture} goBack={goBack} />}
     </SafeAreaView>
 
   );
@@ -143,5 +148,14 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 25,
     color: "black",
+  },
+  loader: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  horizontal: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    padding: 10,
   }
 });
